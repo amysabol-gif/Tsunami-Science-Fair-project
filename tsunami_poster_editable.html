@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>* { box-sizing: border-box; margin: 0; padding: 0; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef } = React;
+
+const INITIAL = {
+  title: "Can We Stop a Tsunami? 🌊",
+  subtitle: "Testing Wave Barriers to Protect Our Town",
+  bigQuestion: 'Can different materials protect a "town" from a tsunami wave?',
+  facts: [
+    { emoji: "⚡", text: "Tsunamis are giant waves caused by underwater earthquakes, volcanoes, or landslides" },
+    { emoji: "🏃", text: "They can travel as fast as a jet plane — up to 500 mph in deep water!" },
+    { emoji: "📏", text: "Near shore, waves can grow up to 100 feet tall — as high as a 10-story building!" },
+  ],
+  hypothesis: 'We think the rock barrier will work best because rocks are heavy, hard to move, and used in real life to protect coasts!',
+  barriers: ["🏖️ Sand", "🪵 Sticks", "🪨 Rocks", "🚫 None"],
+  materials: [
+    "🗃️ Plastic storage bin", "💧 Water + blue food dye",
+    "🧱 LEGO buildings", "🏖️ Sand",
+    "🪵 Popsicle sticks", "🪨 Small rocks",
+    "📏 Ruler", "📓 Notebook & pen",
+    "📸 Camera", "⏱️ Timer"
+  ],
+  steps: [
+    "💧 Fill the bin with 4 inches of water + blue food coloring",
+    "🏗️ Build a small LEGO town at one end of the bin",
+    "🌊 Test with NO barrier first — create a wave & observe",
+    "🏖️ Build the sand wall barrier in front of the town",
+    "📝 Create the same size wave and record results",
+    "🔁 Repeat with popsicle sticks, then rocks",
+  ],
+  results: [
+    { name: "🚫 No Barrier", pct: 0, color: "#e74c3c", desc: "Town completely destroyed! Water swept through everything." },
+    { name: "🏖️ Sand Wall", pct: 40, color: "#f39c12", desc: "Some protection — sand slowed wave but eventually collapsed." },
+    { name: "🪵 Popsicle Sticks", pct: 55, color: "#3498db", desc: "Sticks slowed the wave but gaps let water through." },
+    { name: "🪨 Rock Barrier", pct: 85, color: "#27ae60", desc: "Best protection! Rocks held firm and blocked most of the wave." },
+  ],
+  photos: [
+    { label: "Setting up the bin", sub: "Phoebe + friend building the LEGO town" },
+    { label: "Making waves! 🌊", sub: "Testing the rock barrier" },
+  ],
+  conclusion: "Our hypothesis was correct! The rock barrier provided the best protection against the tsunami wave. We learned that denser, heavier materials work better because they can't be moved as easily by water. Sand started strong but collapsed under pressure, and popsicle sticks had too many gaps. This is why real engineers use heavy rocks, concrete seawalls, and even mangrove forests to protect coastlines from tsunamis! Next time, we'd love to test a combination barrier — rocks AND sand together! 🌊🪨",
+  names: "Phoebe & Friend",
+};
+
+function Editable({ value, onChange, tag = "span", style = {} }) {
+  const [editing, setEditing] = useState(false);
+  const Tag = tag;
+  return (
+    <Tag
+      contentEditable
+      suppressContentEditableWarning
+      onFocus={() => setEditing(true)}
+      onBlur={e => { setEditing(false); onChange(e.currentTarget.textContent); }}
+      style={{
+        outline: "none", borderRadius: "4px", cursor: "text",
+        display: tag === "div" ? "block" : "inline",
+        background: editing ? "rgba(168,220,245,0.25)" : "transparent",
+        boxShadow: editing ? "0 0 0 2px #2a9fd6" : "0 0 0 1.5px transparent",
+        padding: "2px 5px", transition: "all 0.15s",
+        ...style,
+      }}
+    >{value}</Tag>
+  );
+}
+
+function App() {
+  const [d, setD] = useState(INITIAL);
+  const [photoImages, setPhotoImages] = useState([null, null]);
+  const fileRef0 = useRef(); const fileRef1 = useRef();
+  const fileRefs = [fileRef0, fileRef1];
+
+  const set = (key, val) => setD(prev => ({ ...prev, [key]: val }));
+  const setFact = (i, field, val) => setD(prev => { const f=[...prev.facts]; f[i]={...f[i],[field]:val}; return {...prev,facts:f}; });
+  const setResult = (i, field, val) => setD(prev => { const r=[...prev.results]; r[i]={...r[i],[field]:val}; return {...prev,results:r}; });
+  const setStep = (i, val) => setD(prev => { const s=[...prev.steps]; s[i]=val; return {...prev,steps:s}; });
+  const setMaterial = (i, val) => setD(prev => { const m=[...prev.materials]; m[i]=val; return {...prev,materials:m}; });
+  const setPhoto = (i, field, val) => setD(prev => { const p=[...prev.photos]; p[i]={...p[i],[field]:val}; return {...prev,photos:p}; });
+  const handlePhotoUpload = (i, e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { const imgs=[...photoImages]; imgs[i]=ev.target.result; setPhotoImages(imgs); };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div style={{ fontFamily: "'Nunito', sans-serif", background: "#dde8f0", minHeight: "100vh", paddingBottom: "40px" }}>
+      <div style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "linear-gradient(90deg, #0a2d5e, #1a6fa8)",
+        color: "white", textAlign: "center", padding: "9px 16px",
+        fontFamily: "'Nunito', sans-serif", fontSize: "13px", fontWeight: "700",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+      }}>
+        ✏️ Click any text to edit &nbsp;|&nbsp; 🎚️ Drag sliders to update results &nbsp;|&nbsp; 📷 Click photo boxes to upload images
+      </div>
+
+      <div style={{
+        maxWidth: "960px", margin: "20px auto",
+        background: "linear-gradient(160deg, #e8f4fd 0%, #fef9ec 50%, #e8f4fd 100%)",
+        border: "6px solid #1a6fa8", borderRadius: "16px", overflow: "hidden",
+        boxShadow: "0 8px 40px rgba(26,111,168,0.18)"
+      }}>
+
+        {/* HEADER */}
+        <div style={{ background: "linear-gradient(180deg, #0a2d5e 0%, #1a6fa8 60%, #2a9fd6 100%)", padding: "28px 36px 22px", textAlign: "center" }}>
+          <div style={{ fontSize: "28px", marginBottom: "4px" }}>🌊</div>
+          <Editable tag="div" value={d.title} onChange={v => set("title", v)}
+            style={{ fontFamily: "'Fredoka One', cursive", fontSize: "52px", color: "white", lineHeight: 1.1, textShadow: "0 4px 12px rgba(0,0,0,0.3)", marginBottom: "8px" }} />
+          <Editable value={d.subtitle} onChange={v => set("subtitle", v)}
+            style={{ color: "#a8dcf5", fontWeight: 700, fontSize: "16px" }} />
+          <div style={{ marginTop: "6px" }}>
+            <Editable value={d.names} onChange={v => set("names", v)}
+              style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", fontStyle: "italic" }} />
+          </div>
+        </div>
+
+        <div style={{ padding: "14px 24px 28px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "13px" }}>
+
+          {/* BIG QUESTION */}
+          <div style={{ gridColumn: "1 / -1", background: "linear-gradient(135deg, #fff9e6, #fff3c4)", border: "3px solid #f5c518", borderRadius: "14px", padding: "14px 20px", display: "flex", alignItems: "center", gap: "14px", boxShadow: "3px 3px 0 #f5c518" }}>
+            <div style={{ fontSize: "36px" }}>🔬</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Fredoka One', cursive", color: "#b07d00", fontSize: "12px", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>The Big Question</div>
+              <Editable tag="div" value={d.bigQuestion} onChange={v => set("bigQuestion", v)}
+                style={{ fontFamily: "'Fredoka One', cursive", color: "#1a3a5c", fontSize: "20px", lineHeight: 1.3 }} />
+            </div>
+          </div>
+
+          {/* FACTS */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #2a9fd6", boxShadow: "3px 3px 0 #2a9fd6" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#1a6fa8", fontSize: "18px", marginBottom: "10px" }}>🌏 Tsunami Facts!</div>
+            {d.facts.map((fact, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "8px", background: "#f0f8ff", borderRadius: "8px", padding: "8px" }}>
+                <Editable value={fact.emoji} onChange={v => setFact(i, "emoji", v)} style={{ fontSize: "18px", flexShrink: 0 }} />
+                <Editable tag="div" value={fact.text} onChange={v => setFact(i, "text", v)}
+                  style={{ fontSize: "12px", color: "#333", fontWeight: "600", lineHeight: 1.4, flex: 1 }} />
+              </div>
+            ))}
+          </div>
+
+          {/* HYPOTHESIS */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #9b59b6", boxShadow: "3px 3px 0 #9b59b6" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#9b59b6", fontSize: "18px", marginBottom: "10px" }}>💡 Our Hypothesis</div>
+            <div style={{ background: "linear-gradient(135deg, #f9f0ff, #f0e6ff)", borderRadius: "10px", padding: "10px", border: "2px dashed #9b59b6", marginBottom: "10px" }}>
+              <Editable tag="div" value={d.hypothesis} onChange={v => set("hypothesis", v)}
+                style={{ fontSize: "12.5px", color: "#333", lineHeight: 1.6, fontStyle: "italic" }} />
+            </div>
+            <div style={{ background: "#f9f0ff", borderRadius: "8px", padding: "8px", textAlign: "center" }}>
+              <div style={{ fontSize: "11px", color: "#9b59b6", fontWeight: 800, marginBottom: "5px" }}>BARRIERS WE TESTED:</div>
+              <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "4px" }}>
+                {d.barriers.map((b, i) => (
+                  <Editable key={i} value={b} onChange={v => { const arr=[...d.barriers]; arr[i]=v; set("barriers", arr); }}
+                    style={{ fontFamily: "'Fredoka One', cursive", fontSize: "12px", color: "#555" }} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* MATERIALS */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #27ae60", boxShadow: "3px 3px 0 #27ae60" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#27ae60", fontSize: "18px", marginBottom: "10px" }}>🎒 Materials</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px" }}>
+              {d.materials.map((m, i) => (
+                <div key={i} style={{ background: "#f0fff4", borderRadius: "6px", padding: "5px 7px" }}>
+                  <Editable value={m} onChange={v => setMaterial(i, v)} style={{ fontSize: "11px", fontWeight: 700, color: "#1a5c35" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* STEPS */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #e67e22", boxShadow: "3px 3px 0 #e67e22", gridColumn: "1 / 3" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#e67e22", fontSize: "18px", marginBottom: "10px" }}>📋 Steps We Followed</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+              {d.steps.map((step, i) => (
+                <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", background: "#fff8f0", borderRadius: "8px", padding: "7px 8px" }}>
+                  <div style={{ background: "#e67e22", color: "white", borderRadius: "50%", width: "22px", height: "22px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fredoka One', cursive", fontSize: "13px", flexShrink: 0 }}>{i + 1}</div>
+                  <Editable tag="div" value={step} onChange={v => setStep(i, v)}
+                    style={{ fontSize: "11.5px", color: "#333", fontWeight: 600, lineHeight: 1.4, flex: 1 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DIAGRAM */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #1a6fa8", boxShadow: "3px 3px 0 #1a6fa8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#1a6fa8", fontSize: "16px", marginBottom: "10px", textAlign: "center" }}>🗺️ Our Setup</div>
+            <svg width="200" height="130" viewBox="0 0 220 140">
+              <rect x="12" y="62" width="196" height="58" rx="4" fill="#a8dcf5" opacity="0.55"/>
+              <ellipse cx="55" cy="82" rx="22" ry="5" fill="none" stroke="#1a6fa8" strokeWidth="1.5" opacity="0.5"/>
+              <ellipse cx="55" cy="82" rx="34" ry="7" fill="none" stroke="#1a6fa8" strokeWidth="1" opacity="0.3"/>
+              <rect x="12" y="42" width="196" height="78" rx="6" fill="none" stroke="#555" strokeWidth="2.5"/>
+              <rect x="168" y="48" width="14" height="20" fill="#e74c3c" rx="2"/>
+              <rect x="184" y="54" width="11" height="14" fill="#f39c12" rx="2"/>
+              <rect x="160" y="57" width="9" height="11" fill="#27ae60" rx="2"/>
+              <rect x="135" y="50" width="7" height="30" rx="3" fill="#8B6914" opacity="0.9"/>
+              <text x="138" y="88" textAnchor="middle" fontSize="8" fill="#5a4a00" fontFamily="Nunito, sans-serif" fontWeight="bold">barrier</text>
+              <path d="M 22 78 Q 45 66 68 78 Q 90 90 112 78" stroke="#1a6fa8" strokeWidth="2.5" fill="none"/>
+              <polygon points="110,72 119,78 110,84" fill="#1a6fa8"/>
+              <text x="38" y="100" fontSize="9" fill="#1a6fa8" fontFamily="Nunito, sans-serif" fontWeight="bold">WAVE →</text>
+              <text x="175" y="40" fontSize="9" fill="#e74c3c" fontFamily="Nunito, sans-serif" fontWeight="bold">Town</text>
+              <text x="12" y="36" fontSize="9" fill="#555" fontFamily="Nunito, sans-serif">plastic bin</text>
+            </svg>
+            <div style={{ background: "#e8f4fd", borderRadius: "8px", padding: "6px 10px", fontSize: "10.5px", color: "#1a3a5c", fontWeight: 700, textAlign: "center", marginTop: "4px" }}>
+              💧 Add blue food coloring for extra drama!
+            </div>
+          </div>
+
+          {/* RESULTS */}
+          <div style={{ gridColumn: "1 / 3", background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #e74c3c", boxShadow: "3px 3px 0 #e74c3c" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#e74c3c", fontSize: "18px", marginBottom: "10px" }}>📊 Results Chart</div>
+            {d.results.map((r, i) => (
+              <div key={i} style={{ marginBottom: "9px", borderRadius: "10px", padding: "9px 12px", border: `3px solid ${r.color}`, background: "white" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <Editable value={r.name} onChange={v => setResult(i, "name", v)}
+                    style={{ fontFamily: "'Fredoka One', cursive", fontSize: "14px", color: "#1a3a5c" }} />
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: r.color }}>{r.pct}% Protected</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <div style={{ flex: 1, background: "#f0f6ff", borderRadius: "6px", height: "12px", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${r.pct}%`, background: r.color, borderRadius: "6px", transition: "width 0.3s" }} />
+                  </div>
+                  <input type="range" min="0" max="100" value={r.pct}
+                    onChange={e => setResult(i, "pct", Number(e.target.value))}
+                    style={{ width: "80px", accentColor: r.color }} />
+                </div>
+                <Editable tag="div" value={r.desc} onChange={v => setResult(i, "desc", v)}
+                  style={{ fontSize: "11px", color: "#444" }} />
+              </div>
+            ))}
+          </div>
+
+          {/* PHOTOS */}
+          <div style={{ background: "white", borderRadius: "14px", padding: "14px", border: "3px solid #9b59b6", boxShadow: "3px 3px 0 #9b59b6" }}>
+            <div style={{ fontFamily: "'Fredoka One', cursive", color: "#9b59b6", fontSize: "18px", marginBottom: "8px" }}>📸 Our Experiment!</div>
+            {d.photos.map((p, i) => (
+              <div key={i} style={{ marginBottom: "8px" }}>
+                <input ref={fileRefs[i]} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhotoUpload(i, e)} />
+                <div onClick={() => fileRefs[i].current.click()} style={{
+                  background: photoImages[i] ? "transparent" : "linear-gradient(135deg, #f9f0ff, #ede0ff)",
+                  border: "2px dashed #9b59b6", borderRadius: "10px", height: "85px",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", overflow: "hidden"
+                }}>
+                  {photoImages[i]
+                    ? <img src={photoImages[i]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <><div style={{ fontSize: "24px" }}>📷</div><div style={{ fontFamily: "'Fredoka One', cursive", color: "#7d3c98", fontSize: "12px" }}>Click to upload photo</div></>
+                  }
+                </div>
+                <div style={{ marginTop: "4px" }}>
+                  <Editable value={p.label} onChange={v => setPhoto(i, "label", v)}
+                    style={{ fontFamily: "'Fredoka One', cursive", color: "#7d3c98", fontSize: "12px", display: "block" }} />
+                  <Editable value={p.sub} onChange={v => setPhoto(i, "sub", v)}
+                    style={{ color: "#9b59b6", fontSize: "10px", display: "block" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CONCLUSION */}
+          <div style={{ gridColumn: "1 / -1", background: "linear-gradient(135deg, #e8f8f0, #d4f1e4)", borderRadius: "14px", padding: "16px 20px", border: "3px solid #27ae60", boxShadow: "3px 3px 0 #27ae60", display: "flex", gap: "16px", alignItems: "flex-start" }}>
+            <div style={{ fontSize: "50px", flexShrink: 0 }}>🎉</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Fredoka One', cursive", color: "#1a7a45", fontSize: "20px", marginBottom: "8px" }}>Our Conclusion</div>
+              <Editable tag="div" value={d.conclusion} onChange={v => set("conclusion", v)}
+                style={{ fontSize: "13px", color: "#1a4a2e", lineHeight: 1.7, fontWeight: 600 }} />
+            </div>
+          </div>
+
+        </div>
+
+        {/* FOOTER */}
+        <div style={{ background: "linear-gradient(90deg, #0a2d5e, #1a6fa8)", padding: "10px 28px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#a8dcf5", fontSize: "13px" }}>🌊 What Stops a Tsunami? — Testing Wave Barriers</span>
+          <div style={{ display: "flex", gap: "10px" }}>
+            {["🏫 Science Fair", "🔬 Earth Science", "💧 Water & Waves"].map(tag => (
+              <span key={tag} style={{ background: "rgba(255,255,255,0.12)", color: "white", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: 700 }}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
